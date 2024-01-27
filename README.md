@@ -8,3 +8,21 @@ You can find all tutorials on my channel: [Playlist](https://www.youtube.com/pla
 - Part 2: Learn how to setup the environment and implement the Snake game.
 - Part 3: Implement the agent that controls the game.
 - Part 4: Implement the neural network to predict the moves and train it.
+
+## Getting Started
+
+Create a conda environment with the needed modules.
+
+```bash
+conda create -n snake python=3.8
+conda activate snake
+
+pip install pygame matplotlib ipython torch torchvision
+```
+
+Test the game!
+
+```bash
+export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6
+python -B snake_game_human.py
+```
