@@ -12,12 +12,16 @@ LR = 0.001
 
 class Agent:
 
-    def __init__(self):
+    def __init__(self, ckpt=None):
         self.n_games = 0
         self.epsilon = 0 # randomness
         self.gamma = 0.9 # discount rate
         self.memory = deque(maxlen=MAX_MEMORY) # popleft()
+
         self.model = Linear_QNet(11, 256, 3)
+        if ckpt is not None:
+            self.model.load_state_dict(torch.load(ckpt))
+
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
     def remember(self, state, action, reward, next_state, done):
@@ -53,13 +57,15 @@ class Agent:
         return final_move
 
 
-def train():
+def train(args):
+
     plot_scores = []
     plot_mean_scores = []
     total_score = 0
     record = 0
-    agent = Agent()
+    agent = Agent(args.ckpt)
     game = SnakeGameAI()
+
     while True:
         # get old state
         state_old = game.get_state()
@@ -83,11 +89,12 @@ def train():
             agent.n_games += 1
             agent.train_long_memory()
 
+            agent.model.save("last.pt")
             if score > record:
                 record = score
-                agent.model.save()
+                agent.model.save("best.pt")
 
-            print('Game', agent.n_games, 'Score', score, 'Record:', record)
+            print("Game", agent.n_games, "Score", score, "Record:", record)
 
             plot_scores.append(score)
             total_score += score
@@ -96,5 +103,15 @@ def train():
             plot(plot_scores, plot_mean_scores)
 
 
-if __name__ == '__main__':
-    train()
+if __name__ == "__main__":
+
+    import argparse, os
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-c", "--ckpt", type=str, required=False, default=None, help="Checkpoint file to load")
+    args = parser.parse_args()
+
+    # sanity checks
+    assert args.ckpt is None or os.path.exists(args.ckpt), "Checkpoint file does not exist"
+
+    train(args)
